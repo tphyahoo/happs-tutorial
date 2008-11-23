@@ -1,0 +1,71 @@
+{-# LANGUAGE TemplateHaskell, DeriveDataTypeable, NoMonomorphismRestriction  #-}
+module SerializeableUsers {- (
+  module SerializeableUserInfos,
+  Users (..), UserName -- , add_user_job
+  
+) -} where
+import HAppS.State
+import Data.Generics
+import qualified MiscMap as M
+import qualified Data.Set as S
+import qualified Data.ByteString.Char8 as B
+
+import SerializeableUserInfos
+
+import SerializeableJobs
+import Misc
+
+
+newtype UserName = UserName { unusername :: B.ByteString }
+  deriving (Show,Read,Ord, Eq, Typeable,Data)
+instance Version UserName
+$(deriveSerialize ''UserName)
+
+data Users = Users { users :: M.Map UserName UserInfos }
+  deriving (Show,Read,Ord, Eq, Typeable,Data)
+instance Version Users
+$(deriveSerialize ''Users)
+
+-- can fail monadically if the username doesn't exist, or the job name is a duplicate
+add_user_job un jn job = mod_userMM un $ add_job jn job
+
+
+-- adjust users, where the adjustment function can fail monadically
+-- mod_userMM :: (Monad m) => UserName -> (UserInfos -> Either [Char] UserInfos) -> Users -> m Users
+mod_userMM username f (Users us) = either (fail . ("mod_userMM: " ++) )
+                                        (return . Users)
+                                        (M.adjustMM username f us)
+
+-- adjust users, where the adjustment function is presumed to be infallible,
+-- but can still fail monadically if the username is invalid
+mod_userM username f (Users us) = return . Users =<< M.adjustM username f us
+
+set_user_userprofile_contact username c = mod_userM username $ ( mod_userprofile . set_contact $ c )
+set_user_userprofile_blurb username b = mod_userM username $ ( mod_userprofile . set_blurb $ b )
+set_user_userprofile_consultant username isconsultant =
+  mod_userM username $ ( mod_userprofile . set_consultant $ isconsultant )
+
+-- fails monadically if oldpass doesn't match password in user profile, via set_password
+set_user_password :: (Monad m) => UserName -> B.ByteString -> B.ByteString -> Users -> m Users
+set_user_password username oldpass newpass = mod_userMM username $ set_password oldpass newpass
+
+-- set_user_userprofile username p = mod_userM username $ Right . set_userprofile p 
+
+add_user username hashedpass (Users us)
+    | B.null . unusername $ username = fail "blank username"
+    | B.null hashedpass = fail "error: blank password"
+    | not . isalphanum_S . B.unpack . unusername $ username
+        = fail $ "bad username, " ++ allowedCharactersSnip
+    | otherwise = either (fail . ("add_user: " ++))
+                         (return . Users)
+                         ( M.insertUqM username uis us )
+  where uis = UserInfos hashedpass (UserProfile (B.pack "") (B.pack "")
+                                                False (B.pack "") )
+                                   (Jobs $ M.empty)
+
+del_user username uis (Users us) = either (fail . ("del_user: " ++))
+                                        (return . Users)
+                                        ( M.deleteM username us )
+
+
+

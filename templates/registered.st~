@@ -1,0 +1,9 @@
+<h3>Registration successful</h3>
+
+<p>Thanks for registering. A darcsweb account has been created for you.
+
+<p>So you can quickly get started, we also created $testprojectlink$,  
+   a world-readable empty darcs test repository in your name, with instructions on how to check it out.
+
+<p>Probably the next thing you should do is register a public <a href=/tutorial/ssh-key-upload>ssh key</a> with darcsweb
+   so that you have write access to your repositories.

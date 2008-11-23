@@ -1,0 +1,1 @@
+This is just to prove that subdirectories work correctly when browsing <a href="/templates/testsub">templates/testsub</a> 

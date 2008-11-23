@@ -1,0 +1,122 @@
+html,body{margin:0;padding:0}
+
+body{font: 85% arial,sans-serif}
+
+/* p{margin:0 10px 10px} */
+
+/* a{color: green} */ /* 006 */ 
+
+div#header{position:relative}
+
+/*
+div#header h1{
+  height:70px;
+  line-height:70px;
+  margin:0;
+  padding-left:10px;
+  background: #EEE;
+  color: #79B30B}
+*/
+
+
+div#header h4{  
+  margin:0;
+  padding-left:10px;
+  background: #EEE;
+  a{color: green}
+}
+
+
+div#header a {
+  /* color: green; */
+
+
+}
+
+/* menu colors */
+a.menuitem:link {color: blue}
+a.menuitem:active {color: blue}
+a.menuitem:visited {color: blue}
+a.menuitem:hover {color: blue}
+a.menuitemselected:link {color: red}
+a.menuitemselected:active {color: red}
+a.menuitemselected:visited {color: red}
+a.menuitemselected:hover {color: red}
+
+a.attention:link {color: orange}
+a.attention:active {color: orange}
+a.attention:visited {color: orange}
+a.attention:hover {color: orange}
+
+
+
+
+
+/* div#header a{background: #EEE;height:80px}  */
+
+
+
+/* div#content p{line-height:1.4} */
+
+div#content
+{
+  background-color: white;
+  /* padding-left: 10px; */
+}
+div#content p{
+ padding-left: 10px 
+}
+div#content h3{
+  padding-left: 5px;
+}
+
+div#dealform{
+  background:#B9CAFF;
+  float:left;
+  width:40%;
+
+}
+
+
+/* div#dealform{float:left;width:50%} */
+
+div#suggestions{background:#FF8539}
+div#suggestions{float:left;width:59.9%}
+
+div#footer{background: #333;color: #FFF}
+
+/* div#footer p{margin:0 0 0 0;padding:5px 10px} */
+
+div#footer a{display:inline;padding:0;color: #C6D5FD}
+div#footer{clear:left;width:100%}
+
+
+/* .pbox {
+    /* border: 2px solid #73a1ca; */
+    margin-left:20px; 
+    border-collapse: collapse;
+    /*margin: 0 5px 10px 5px;*/
+    /*width: 285px;
+    padding: 5px;
+    float: left;*/
+} */
+
+/*
+
+
+.dealform { margin: 0px; padding: 0px; }
+.dealform table { border-collapse: collapse;  }
+.dealform td { white-space: nowrap; }
+.dealform input.logtxt { color:black; width: 135px}
+.dealform td.right { text-align: right}
+.dealform button.btn { margin: 0px; padding: 2px 3px 2px 3px}
+.dealform a { padding-left: 1em }
+
+
+*/
+
+.iform button {background-color:#e9e9e9; border: 1px solid #336699; vertical-align: bottom} 
+.btn { background-color:#e9e9e9;
+       border: 1px solid #336699; 
+       margin: 0 5px 0 5px; vertical-align: bottom }
+

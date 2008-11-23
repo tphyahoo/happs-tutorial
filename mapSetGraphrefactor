@@ -1,0 +1,25 @@
+size balanced b tree / avl
+   code should be in one place.
+
+in ghc 6.8.3, try gre -irl avl
+
+Data.Graph.Inductive.Tree should use Data.Map, or perhaps should use something that Data.Map is also using.
+
+Should then be easy to get serializeable instance for Gr.
+  In HAppS.Data.Serialize there is already
+-- note below, Data.Map doesn't export constructors.
+instance Version (Map.Map a b) where mode = Primitive
+instance (Serialize a,Serialize b, Eq a) => Serialize (Map.Map a b) where
+    getCopy = contain ( fmap Map.fromAscList safeGet )
+    putCopy m = contain . safePut . Map.toList $ m
+
+We could then add 
+-- note, Gr does export constructor Gr
+instance Version (Gr a b) where mode = Primitive
+instance (Serialize a,Serialize b, Eq a) => Serialize (Map.Map a b) where
+    getCopy = contain ( fmap ( Gr . Map.fromAscList )safeGet )
+    putCopy (Gr m) = contain . safePut . Map.toList $ m
+
+ ??? no...
+
+For now though the quicker fix is to simply add fromAscList to graph FiniteMap.

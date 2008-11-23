@@ -1,0 +1,168 @@
+To do:
+
+make depend on hackage package HStringTemplateHelpers (which should be uploaded to hackage)
+
+migrate improvements from darcsweb
+  diff Misc
+  diff MiscTemplateStuff, or whatever it's called
+  error handling for new user, new job, in ControllerPostActions, 
+    newUserPage, processFormNewJob
+    and corresponding state files (remember to say "job" instead of "repo" in error messages)
+    eg SerializeableUsers.hs
+  writeFileForce can be deleted and use what's in HSH.Helpers
+
+AppStateSetBased is a poor name, since it's really a Data.Map now.
+
+in processformeditconsultantprofile: 
+  -- to do: verify this handles errors, eg try writing to someplace we don't have permission,
+  -- or a filename with spaces, whatever
+
+Result: after bytestringification, I can insert 1000 users in 30 seconds on laptop. 
+  (I think I could already do this, but maybe not as fast.)
+  Checkpoint file after first 1000 users is 17M. Is this an improvement?
+  After 2000 users, went out of memory when creating checkpoint on laptop.
+  Lemmih had 2119 bytes/insert when still using strings, for 200 users.
+  I have 809 bytes, for 1000 users.
+  for 200 users? Same, 809b.
+
+Is the situation any better on linode? I can get up 6000 users, but no huge difference
+  which is to be expected as specs are similar.
+
+-- could bytestring help in terms of display time for tables with a lot of data, eg all jobs?
+
+  strangely, performance is much better on live server, at linode:
+  I can insert in batches of 1000 at a time, and it's fast
+  However, I can't insert 2000, it gets killed by the linode uml hypervisor
+    Also, if I try to view jobs for 15000 users, it gets killed by the hypervisor.
+    Stress Test for atomic inserts, all jobs at once Completed
+    Users 13925 to 14924 have been inserted.
+    Stress test time: 13 secs 
+
+    Users 21 to 1020 have been inserted.
+          Stress test time: 8 secs
+  However, it concs out soon after if I try a 10000 user insert
+  insertuAllJobs, added user: user1127
+Killed
+
+insertuAllJobs, added user: user20096
+atomic inserts, all jobs at once stresstest, 1000 users, elapsedtime: 38 secs
+insertuAllJobs, added user: user21096
+atomic inserts, all jobs at once stresstest, 1000 users, elapsedtime: 15 secs
+at insertuAllJobs, added user: user21166, seems to be stuck. not inserting more users, but 
+  not being killed by the hypervisor either.
+  shit, maybe that's because I inadvertently requested a page that caused a big query action.
+  try agian.  
+
+  How much does more ram cost?
+    Linode has ~3GB ram servers available for $150/month. What about dreamhost?
+    scam offers of 8GB ram vps for $200/month but they're... well... scams
+ 
+  Group q: Can HAppS be tweaked to create a checkpoint after every, say, 1000 transactions?
+
+  In the snip below, nheptane shows how to create a checkpoint after every orderly shutdown. 
+  But if you have a long-running process (days) with a lot of data to checkpoint, and your server
+    power goes out, my understanding is that you lose all that data. 
+    
+
+  v5:
+
+    v5 announcement: Real World HAppS Tutorial Version 5: Macid For Dummies.
+      In this release of the HAppS tutorial I added a lot of material on macid, 
+      plus a few other miscelaneous topics. New chapters include: introduction to macid, using macid safely,
+      inserting dummy data using macid, macid updates and queries,
+      speculations on the scalability of macid <,and macid migration?>. 
+      Also displaying utf8 correctly, get and post processing, and debugging.
+      Also file uploads, which enable us to have user profile pictures.
+
+  resolve stress test issues 
+    Amazon ec2, 15GB, pay for an hour. See if it makes any difference.
+
+    see if I can convincingly demo 100,000 users and 2000 transactions/sec.
+     For one thing, users pages now have to paginate (developers, and also developers wanted)
+
+
+  notes... after 1000 user insert (one big, but don't think it matters)
+    thartman@thartman-laptop:~/happs-tutorial>ls -lth _local/happs-tutorial_state/ | head
+    -rw-r--r-- 1 thartman thartman  22M Oct 14 14:21 events-0000000101
+    top: 
+	PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  SWAP COMMAND
+      23961 thartman  20   0  443m 185m 2132 S  0.0 38.1   1:24.28 257m happs-tutorial
+
+      PID   USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND
+      23961 thartman  20   0  443m 185m 2132 S  0.0 38.1   1:24.28 happs-tutorial
+
+
+    google analytics should track happstutorial, fix cookies issue.
+      assuming stress tests passes convincingly, we're going to build for-profit sites with this.
+
+    update macid-data-safety with fact that seems one macid file gets written per startup/shutdown, 
+      after grokking what nheptane has to say on the subject, 
+
+    fix tk places
+
+    Could point people to job results pagination, for explaining the FromData instancing mechanism.
+      Note that data here means query data, not appdata.
+      tutorial page: reading query data
+                     reading macid data (have to justify calling this macid?)
+        leave table pagination for zzz's job posts as an exercise for the reader.
+
+  whither happs: http://groups.google.am/group/HAppS/browse_thread/thread/8ca61508664d4fb5
+    (unanswered questions)
+
+  could move migration q&a in maciddatasafety to new page on migration.
+
+  HAppS state links: 
+  http://groups.google.com/group/HAppS/browse_thread/thread/bcfb81b12b0f9c67/fd9800cba6ba6fa6?lnk=gst&q=love+the+idea#fd9800cba6ba6fa6 (love the idea)
+  http://discuss.fogcreek.com/joelonsoftware/default.asp?cmd=show&ixPost=60639 (prevayler thread)
+  
+
+  Explain how to migrate data. (Or maybe just make the link gray and move to v6, this stress testing thing is 
+    quite involved.)
+
+  See if can have less methods created with mkmethods but still have everything work.
+  I'm guessing this would make migration simpler. (Why? Gut?)
+
+v6
+
+  Clean up main (ControllersBasic has a lot of cruft from when I had a less good understanding of happs than now,
+  the examples may be more confusing than they have to be.)
+
+    Ask nheptane for help running his HAppS+HSP stuff. Can he just tar up and send me what he has?
+      In return, I will make sure this is cabal installable as a quickstart for anyone who wants to use
+      what he has.
+
+    Acknowledge Jeremy Shaw (nheptane) in thanks, saying specifically what he helped with. 
+      He's got import HSP.Google.Analytics. Can I use that?
+      What does hsp have to offer me if anything?
+
+    Q: Can the types of "creeping model" problems Terrence TK (ST creator) describes in TK happen
+       in HSP? Try to demonstrate this, and if so argue that this is an advantage of ST over hsp...
+       that ST keeps the view code pure.
+  
+    In thanks: The HAppS devs, obviously: Alex Jacobsen and LemmiH, who answered many questions
+      helpfully on #happs and the googlegroup... did I miss anyone?
+
+
+  jobs should definitely be a set, not a list. otherwise you can have two jobs with the same name
+    (maybe part of v5 data cleanup)
+
+  instance fromData places, double check form fails safely if the user inputs bad data.
+      (try to break the form by behaving like a naughty user)
+
+  Get rid of handlers as monoids. (In explanation, though can leave them in as code.)
+
+  Address in-memory (macid transactional query/update) datastore,
+  versus blobs that can be stored on filesystem (IO read),
+    where transactionality is not required, nor guaranteed.
+
+  menubar: colsize is wrong, search web on correct attribute
+
+  more idiomatic use of ST for table output
+  ST can play nicely with html tables... right? review email from sclv
+
+v7
+  Make a social accounting system. hstartup-template on hackage?
+    (How about Startup Templates as a for-profit business venture?)
+    hsocial-startup-template?
+
+  email sclv patches for directoryGroupSafer, setManyAttribsafer
